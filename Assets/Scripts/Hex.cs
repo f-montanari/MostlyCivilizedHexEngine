@@ -102,32 +102,30 @@ public class Hex : IQPathTile {
         return HexMap.GetHexPosition(this);
     }
 
-    public Vector3 PositionFromCamera( Vector3 cameraPosition, float numRows, float numColumns )
+    public Vector3 PositionFromCamera(Vector3 cameraPosition, float numRows, float numColumns)
     {
         float mapHeight = numRows * HexVerticalSpacing();
-        float mapWidth  = numColumns * HexHorizontalSpacing();
+        float mapWidth = numColumns * HexHorizontalSpacing();
 
-        Vector3 position = Position();
+        Vector3 position = Position();        
 
-        if(HexMap.AllowWrapEastWest)
+        if (HexMap.AllowWrapEastWest)
         {
             float howManyWidthsFromCamera = Mathf.Round((position.x - cameraPosition.x) / mapWidth);
-            int howManyWidthToFix = (int)howManyWidthsFromCamera;
-
-            position.x -= howManyWidthToFix * mapWidth;
+            int howManyWidthToFix = (int)howManyWidthsFromCamera;            
+            position.x -= howManyWidthToFix * mapWidth;            
         }
 
-        if(HexMap.AllowWrapNorthSouth)
+        if (HexMap.AllowWrapNorthSouth)
         {
             float howManyHeightsFromCamera = Mathf.Round((position.z - cameraPosition.z) / mapHeight);
-            int howManyHeightsToFix = (int)howManyHeightsFromCamera;
-
+            int howManyHeightsToFix = (int)howManyHeightsFromCamera;          
             position.z -= howManyHeightsToFix * mapHeight;
         }
 
 
         return position;
-    }
+    }   
 
     public static float CostEstimate(IQPathTile aa, IQPathTile bb)
     {

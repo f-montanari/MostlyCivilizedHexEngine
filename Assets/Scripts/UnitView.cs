@@ -9,10 +9,11 @@ public class UnitView : MonoBehaviour {
         newPosition = this.transform.position;
     }
 
-    Vector3 newPosition;
-
+    Vector3 newPosition;    
     Vector3 currentVelocity;
     float smoothTime = 0.5f;
+
+    public bool MoveAllowed = false;
 
     public void OnUnitMoved( Hex oldHex, Hex newHex )
     {
@@ -28,6 +29,7 @@ public class UnitView : MonoBehaviour {
         Vector3 oldPosition = oldHex.PositionFromCamera();
         newPosition = newHex.PositionFromCamera();
         currentVelocity = Vector3.zero;
+        MoveAllowed = true;
 
         // TODO:  newPosition's Y component needs to be set from HexComponent's VerticalOffset
         oldPosition.y += oldHex.HexMap.GetHexGO(oldHex).GetComponent<HexComponent>().VerticalOffset;
@@ -45,18 +47,18 @@ public class UnitView : MonoBehaviour {
             // TODO: WE need a better signalling system and/or animation queueing
             GameObject.FindObjectOfType<HexMap>().AnimationIsPlaying = true;
         }
-    }
-
+    }    
 
     void Update()
     {
-
-        this.transform.position = Vector3.SmoothDamp( this.transform.position, newPosition, ref currentVelocity, smoothTime );
+        if(MoveAllowed)
+            this.transform.position = Vector3.SmoothDamp( this.transform.position, newPosition, ref currentVelocity, smoothTime );
 
         // TODO: Figure out the best way to determine the end of our animation
         if( Vector3.Distance( this.transform.position, newPosition ) < 0.1f )
         {
             GameObject.FindObjectOfType<HexMap>().AnimationIsPlaying = false;
+            MoveAllowed = false;
         }
     }
 

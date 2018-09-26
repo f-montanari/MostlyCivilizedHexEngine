@@ -4,19 +4,21 @@ using UnityEngine;
 using QPath;
 using System.Linq;
 
-public class Unit : MapObject, IQPathUnit {
+public class Unit : MapObject, IQPathUnit {    
+    
 
     public Unit()
     {
+        // TODO: Rename
         Name = "Dwarf";
     }
 
+    // Attributes
     public int Strenth = 8;
     public int Movement = 2;
     public int MovementRemaining = 2;
     public bool CanBuildCities = false;
-    public bool SkipThisUnit = false;
-
+    public bool SkipThisUnit = false;    
 
     /// <summary>
     /// List of hexes to walk through (from pathfinder).
@@ -238,7 +240,7 @@ public class Unit : MapObject, IQPathUnit {
 
         return turnsToDateWhole + turnsUsedAfterThismove;
 
-    }
+    }    
 
     override public void SetHex( Hex newHex )
     {

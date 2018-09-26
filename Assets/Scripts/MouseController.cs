@@ -245,9 +245,6 @@ public class MouseController : MonoBehaviour
         Camera.main.transform.Translate (diff, Space.World);
 
         lastMouseGroundPlanePosition = hitPos = MouseToGroundPlane(Input.mousePosition);
-
-            
-
     }
 
     void Update_ScrollZoom()

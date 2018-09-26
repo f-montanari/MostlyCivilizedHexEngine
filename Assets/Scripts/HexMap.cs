@@ -22,12 +22,15 @@ public class HexMap : MonoBehaviour, IQPathWorld {
     void GeneratePlayers( int numPlayers )
     {
         Players = new Player[numPlayers];
+
+        // Set every player as AI by default
         for (int i = 0; i < numPlayers; i++)
         {
             Players[i] = new Player( "Player " + (i+1).ToString() );
             Players[i].Type = Player.PlayerType.AI;
         }
-        //CurrentPlayer = Players[0];
+        
+        // Set this player to local player.
         Players[0].Type = Player.PlayerType.LOCAL;
         currentPlayerIndex = 0;
     }
@@ -98,6 +101,7 @@ public class HexMap : MonoBehaviour, IQPathWorld {
     [System.NonSerialized] public float MoistureGrasslands = 0f;
     [System.NonSerialized] public float MoisturePlains = -0.75f;
 
+    // Map dimensions by default
     [System.NonSerialized] public int NumRows = 30;
     [System.NonSerialized] public int NumColumns = 60;
 
