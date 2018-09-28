@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,8 +7,26 @@ using UnityEngine.EventSystems;
 public class MouseController : MonoBehaviour
 {
 
+    enum InputType
+    {
+        MOBILE,
+        PC
+    }
+
+    // PC by default
+    private InputType inputType = InputType.PC;
+
     // Use this for initialization
     void Start ()
+    {
+        if (Application.isMobilePlatform)
+        {
+            inputType = InputType.MOBILE;
+        }
+
+        Init();        
+    }
+    public void Init()
     {
         Update_CurrentFunc = Update_DetectModeStart;
 
@@ -40,7 +59,7 @@ public class MouseController : MonoBehaviour
 
     public LayerMask LayerIDForHexTiles;
 
-    void Update()
+    public void Update()
     {
         hexUnderMouse = MouseToHex();
 
@@ -90,7 +109,7 @@ public class MouseController : MonoBehaviour
     }
         
 
-    public void CancelUpdateFunc()
+    public virtual void CancelUpdateFunc()
     {
         Update_CurrentFunc = Update_DetectModeStart;
 
@@ -98,7 +117,7 @@ public class MouseController : MonoBehaviour
         hexPath = null;
     }
 
-    void Update_DetectModeStart()
+    public virtual void Update_DetectModeStart()
     {
         // Check here(?) to see if we are over a UI element,
         // if so -- ignore mouse clicks and such.
@@ -109,6 +128,19 @@ public class MouseController : MonoBehaviour
             // Although, if those are set to NotInteractive or Not Block
             // Raycasts, maybe this will return false for them anyway.
             return;
+        }
+
+        if(inputType == InputType.MOBILE)
+        {
+            // Check if there are more than 1 touches, so we can track
+            // if the player was trying to zoom, multi-select, etc.
+
+            if(Input.touches.Length > 1)
+            {
+                Update_HandleMultipleTouches();
+                // Cancel any other input?
+                return;
+            }
         }
 
         if (Input.GetMouseButtonDown (0)) 
@@ -146,7 +178,7 @@ public class MouseController : MonoBehaviour
 
         }
         else if( Input.GetMouseButton(0) && 
-            Vector3.Distance( Input.mousePosition, lastMousePosition) > mouseDragThreshold )
+                 Vector3.Distance( Input.mousePosition, lastMousePosition) > mouseDragThreshold )
         {
             // Left button is being held down AND the mouse moved? That's a camera drag!
             Update_CurrentFunc = Update_CameraDrag;
@@ -158,6 +190,33 @@ public class MouseController : MonoBehaviour
             // We have a selected unit, and we are holding down the mouse
             // button.  We are in unit movement mode -- show a path from
             // unit to mouse position via the pathfinding system.
+        }
+
+    }
+
+    Vector2 lastTouchAverage = Vector2.zero;
+    Vector2 offset = new Vector2(1f, 1f);
+    private void Update_HandleMultipleTouches()
+    {
+        Touch touchZero = Input.GetTouch(0);
+        Touch touchOne = Input.GetTouch(1);
+
+        Vector2 touchZeroPrevPos = touchZero.position - touchZero.deltaPosition;
+        Vector2 touchOnePrevPos = touchOne.position - touchOne.deltaPosition;
+
+        // Find the magnitude of the vector (the distance) between the touches in each frame.
+        float prevTouchDeltaMag = (touchZeroPrevPos - touchOnePrevPos).magnitude;
+        float touchDeltaMag = (touchZero.position - touchOne.position).magnitude;
+
+        // Find the difference in the distances between each frame.
+        float deltaMagnitudeDiff = prevTouchDeltaMag - touchDeltaMag;
+        if(deltaMagnitudeDiff > 0)
+        {
+            Scroll(-0.1f);
+        }
+        else if(deltaMagnitudeDiff < 0)
+        {
+            Scroll(0.1f);
         }
 
     }
@@ -245,12 +304,16 @@ public class MouseController : MonoBehaviour
         Camera.main.transform.Translate (diff, Space.World);
 
         lastMouseGroundPlanePosition = hitPos = MouseToGroundPlane(Input.mousePosition);
-    }
+    }    
 
     void Update_ScrollZoom()
     {
         // Zoom to scrollwheel
         float scrollAmount = Input.GetAxis ("Mouse ScrollWheel");
+        Scroll(scrollAmount);
+    }
+    void Scroll(float scrollAmount)
+    {
         float minHeight = 2;
         float maxHeight = 20;
         // Move camera towards hitPos
@@ -261,7 +324,8 @@ public class MouseController : MonoBehaviour
 
         // Stop zooming out at a certain distance.
         // TODO: Maybe you should still slide around at 20 zoom?
-        if (scrollAmount > 0 || p.y < (maxHeight - 0.1f)) {
+        if (scrollAmount > 0 || p.y < (maxHeight - 0.1f))
+        {
             cameraTargetOffset += dir * scrollAmount;
         }
         Vector3 lastCameraPosition = Camera.main.transform.position;
@@ -270,24 +334,23 @@ public class MouseController : MonoBehaviour
 
 
         p = Camera.main.transform.position;
-        if (p.y < minHeight) {
+        if (p.y < minHeight)
+        {
             p.y = minHeight;
         }
-        if (p.y > maxHeight) {
+        if (p.y > maxHeight)
+        {
             p.y = maxHeight;
         }
         Camera.main.transform.position = p;
 
         // Change camera angle
-        Camera.main.transform.rotation = Quaternion.Euler (
-            Mathf.Lerp (30, 75, Camera.main.transform.position.y / maxHeight),
+        Camera.main.transform.rotation = Quaternion.Euler(
+            Mathf.Lerp(30, 75, Camera.main.transform.position.y / maxHeight),
             Camera.main.transform.rotation.eulerAngles.y,
             Camera.main.transform.rotation.eulerAngles.z
         );
-
-
     }
-
     void Update_CityView()
     {
         // Can you still click on a unit you see during city view?
