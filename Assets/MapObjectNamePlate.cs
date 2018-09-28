@@ -10,13 +10,16 @@ public class MapObjectNamePlate : MonoBehaviour {
         if(TheCamera == null)
             TheCamera = Camera.main;
 
+        if (myCanvas == null)
+            myCanvas = transform.GetComponentInParent<Canvas>();
+
         rectTransform = GetComponent<RectTransform>();
 	}
 
     public GameObject MyTarget;
     public Vector3 WorldPositionOffset = new Vector3(0, 1, 0);
     public Vector3 ScreenPositionOffset = new Vector3(0, 30, 0);
-
+    public Canvas myCanvas;
     public Camera TheCamera;
 
     RectTransform rectTransform;
@@ -32,7 +35,7 @@ public class MapObjectNamePlate : MonoBehaviour {
 		
         // Find out the screen position of our object and set ourselves to that, plus offset
         Vector3 screenPos = TheCamera.WorldToScreenPoint( MyTarget.transform.position + WorldPositionOffset );
-
+        screenPos /= myCanvas.scaleFactor;
         rectTransform.anchoredPosition = screenPos + ScreenPositionOffset;
 	}
 }
