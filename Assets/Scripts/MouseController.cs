@@ -6,6 +6,20 @@ using UnityEngine.EventSystems;
 
 public class MouseController : MonoBehaviour
 {
+    #region Singleton
+    private static MouseController _instance;
+    public static MouseController instance
+    {
+        get
+        {
+            if(_instance == null)
+            {
+                _instance = FindObjectOfType<MouseController>();
+            }
+            return _instance;
+        }        
+    }
+    #endregion
 
     enum InputType
     {
@@ -107,7 +121,6 @@ public class MouseController : MonoBehaviour
         lineRenderer.positionCount = ps.Length;
         lineRenderer.SetPositions(ps);
     }
-        
 
     public virtual void CancelUpdateFunc()
     {
@@ -174,7 +187,7 @@ public class MouseController : MonoBehaviour
         {
             // We have a selected unit, and we've pushed down the right
             // mouse button, so enter unit movement mode.
-            Update_CurrentFunc = Update_UnitMovement;
+            SetMoveUpdate();
 
         }
         else if( Input.GetMouseButton(0) && 
@@ -257,7 +270,7 @@ public class MouseController : MonoBehaviour
 
     void Update_UnitMovement ()
     {
-        if( Input.GetMouseButtonUp(1) || selectionController.SelectedUnit == null )
+        if( Input.GetMouseButtonUp(1) || selectionController.SelectedUnit == null || Input.GetMouseButtonUp(0) )
         {
             Debug.Log("Complete unit movement.");
 
@@ -312,6 +325,7 @@ public class MouseController : MonoBehaviour
         float scrollAmount = Input.GetAxis ("Mouse ScrollWheel");
         Scroll(scrollAmount);
     }
+
     void Scroll(float scrollAmount)
     {
         float minHeight = 2;
@@ -351,6 +365,7 @@ public class MouseController : MonoBehaviour
             Camera.main.transform.rotation.eulerAngles.z
         );
     }
+
     void Update_CityView()
     {
         // Can you still click on a unit you see during city view?
@@ -363,5 +378,8 @@ public class MouseController : MonoBehaviour
         Update_CurrentFunc = Update_CityView;
     }
 
-
+    public void SetMoveUpdate()
+    {
+        Update_CurrentFunc = Update_UnitMovement;
+    }
 }
